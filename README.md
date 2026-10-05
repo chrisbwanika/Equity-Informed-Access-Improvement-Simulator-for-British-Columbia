@@ -72,7 +72,13 @@ See `methods/ai_assistance.md` for how AI tools were used and how their output w
 
 ## How to cite
 
+If you use or adapt this work, please cite it:
+
+Bwanika, C. (2026). *Equity-Informed Access Improvement Simulator for British Columbia*
+(Version 2.0.0).
+https://github.com/chrisbwanika/Equity-Informed-Access-Improvement-Simulator-for-British-Columbia
+
 Bwanika, C. (2026). *Equity-Informed Access Improvement Simulator* (Version 2)
-[Computer software]. [repository URL]
+
 Code: MIT licence (`LICENSE`). Documentation and report text: CC BY 4.0. To cite, use
 `CITATION.cff`.
