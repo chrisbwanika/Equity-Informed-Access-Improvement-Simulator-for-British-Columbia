@@ -1,0 +1,17 @@
+# R and RStudio session files
+.Rproj.user/
+.Rhistory
+.RData
+.Ruserdata
+
+# Generated outputs: recreated by run_all.R, so never committed
+outputs/
+
+# Quarto working files and its copies of figures (images are embedded in docs/index.html)
+.quarto/
+docs/outputs/
+
+# renv manages its own renv/.gitignore for the package library
+
+/.quarto/
+**/*.quarto_ipynb

@@ -1,0 +1,4 @@
+strategy,label,lower_barrier,moderate_barrier,higher_barrier
+usual_care,Usual care,0,0,0
+targeted_navigation,Targeted navigation (higher-barrier group only),0,0,1
+universal_navigation,Universal navigation (all groups),1,1,1

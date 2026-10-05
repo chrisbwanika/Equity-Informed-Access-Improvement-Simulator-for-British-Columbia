@@ -1,0 +1,84 @@
+parameter,group,module,value,se,distribution,unit,description,source_type,rationale
+start_age,all,markov,55,,fixed,years,Cohort age at referral,structural_choice,Single-age cohort; age heterogeneity not modelled in v2
+cycle_length,all,markov,0.25,,fixed,years,Model cycle length (one quarter),structural_choice,Referral and diagnostic delays unfold over months so quarterly cycles capture them
+horizon_years,all,markov,45,,fixed,years,Time horizon (age 55 to 100),structural_choice,Lifetime horizon consistent with the CDA-AMC reference case
+discount_rate,all,markov,0.015,,fixed,per year,Annual discount rate for costs and QALYs,guideline,CDA-AMC 2017 reference case; 0 and 0.03 tested as scenarios
+k_threshold,all,markov,50000,,fixed,CAD per QALY,Threshold used for net monetary and net health benefit,illustrative_threshold,Canada has no official threshold; results are also shown from 0 to 150000
+n_cohort,all,markov,10000,,fixed,patients,Annual referral cohort size,synthetic_assumption,Illustrative programme scale
+n_population,all,markov,1000000,,fixed,people,Catchment population used in the DCEA,synthetic_assumption,Illustrative catchment size
+gompertz_a,all,markov,2.7e-05,,fixed,per year,Background mortality Gompertz scale,synthetic_assumption,Adult-like mortality shape; replace with a Statistics Canada life table for real use
+gompertz_b,all,markov,0.095,,fixed,per year of age,Background mortality Gompertz slope,synthetic_assumption,As above
+hr_acute_managed,all,markov,0.35,0.07,lognormal,hazard ratio,Acute-event hazard when managed relative to unresolved,synthetic_assumption,Management is assumed to lower acute risk
+p_case_fatality,all,markov,0.08,0.015,beta,probability per event,Probability of death in the quarter of an acute event,synthetic_assumption,Illustrative
+p_post_acute_managed,all,markov,0.55,0.08,beta,probability,Probability an acute-event survivor enters management,synthetic_assumption,Acute events often trigger diagnosis
+u_managed,all,markov,0.80,0.02,beta,utility,Utility while managed,synthetic_assumption,Illustrative
+dec_unresolved,all,markov,0.07,0.02,gamma,utility decrement,Utility loss while unresolved relative to managed,synthetic_assumption,A decrement keeps utility ordering logical in every PSA draw
+dec_acute,all,markov,0.30,0.05,gamma,utility decrement,Utility loss in an acute-event quarter relative to managed,synthetic_assumption,As above
+c_unresolved,all,markov,350,70,gamma,CAD per quarter,Health-system cost while unresolved,synthetic_assumption,Repeat primary-care and emergency contacts
+c_managed,all,markov,520,104,gamma,CAD per quarter,Health-system cost while managed,synthetic_assumption,Specialist follow-up tests and treatment
+c_acute,all,markov,9500,1900,gamma,CAD per acute event,Health-system cost of an acute event,synthetic_assumption,Hospital admission
+c_navigation,all,markov,750,150,gamma,CAD per navigated patient,One-off navigation programme cost,synthetic_assumption,Navigator time and coordination
+nav_cycles,all,markov,4,,fixed,cycles,Duration of navigation support (quarters),structural_choice,Effect acts only while navigation is active
+p_complete,lower_barrier,markov,0.45,0.04,beta,probability per quarter,Pathway completion under usual care,synthetic_assumption,Barrier gradient in access
+p_complete,moderate_barrier,markov,0.33,0.04,beta,probability per quarter,Pathway completion under usual care,synthetic_assumption,Barrier gradient in access
+p_complete,higher_barrier,markov,0.20,0.03,beta,probability per quarter,Pathway completion under usual care,synthetic_assumption,Barrier gradient in access
+p_acute_unresolved,lower_barrier,markov,0.025,0.005,beta,probability per quarter,Acute event while unresolved,synthetic_assumption,Barrier gradient in risk
+p_acute_unresolved,moderate_barrier,markov,0.030,0.006,beta,probability per quarter,Acute event while unresolved,synthetic_assumption,Barrier gradient in risk
+p_acute_unresolved,higher_barrier,markov,0.040,0.008,beta,probability per quarter,Acute event while unresolved,synthetic_assumption,Barrier gradient in risk
+p_disengage,lower_barrier,markov,0.015,0.004,beta,probability per quarter,Managed patient disengages and becomes unresolved,synthetic_assumption,Barrier gradient in continuity
+p_disengage,moderate_barrier,markov,0.025,0.006,beta,probability per quarter,Managed patient disengages and becomes unresolved,synthetic_assumption,Barrier gradient in continuity
+p_disengage,higher_barrier,markov,0.045,0.010,beta,probability per quarter,Managed patient disengages and becomes unresolved,synthetic_assumption,Barrier gradient in continuity
+hr_bg_mortality,lower_barrier,markov,1.00,,fixed,hazard ratio,Background mortality relative to the lower-barrier group,synthetic_assumption,Social gradient in mortality
+hr_bg_mortality,moderate_barrier,markov,1.20,,fixed,hazard ratio,Background mortality relative to the lower-barrier group,synthetic_assumption,Social gradient in mortality
+hr_bg_mortality,higher_barrier,markov,1.50,,fixed,hazard ratio,Background mortality relative to the lower-barrier group,synthetic_assumption,Social gradient in mortality
+uptake,lower_barrier,markov,0.80,0.05,beta,proportion,Share of offered patients who take up navigation,synthetic_assumption,Lower uptake where barriers are higher
+uptake,moderate_barrier,markov,0.75,0.05,beta,proportion,Share of offered patients who take up navigation,synthetic_assumption,Lower uptake where barriers are higher
+uptake,higher_barrier,markov,0.65,0.07,beta,proportion,Share of offered patients who take up navigation,synthetic_assumption,Lower uptake where barriers are higher
+hr_navigation,lower_barrier,markov,1.15,0.08,lognormal,hazard ratio,Completion hazard for navigated patients while navigation is active,synthetic_assumption,Larger effect where barriers are larger
+hr_navigation,moderate_barrier,markov,1.35,0.12,lognormal,hazard ratio,Completion hazard for navigated patients while navigation is active,synthetic_assumption,Larger effect where barriers are larger
+hr_navigation,higher_barrier,markov,1.70,0.20,lognormal,hazard ratio,Completion hazard for navigated patients while navigation is active,synthetic_assumption,Larger effect where barriers are larger
+hh_income_sdlog,all,ecea,0.6,,fixed,log-scale SD,Spread of household income within each group,synthetic_assumption,ECEA-lite
+burden_threshold,all,ecea,0.05,,fixed,share of annual income,High non-medical burden threshold,synthetic_assumption,0.025 and 0.10 also reported
+hh_cost_unresolved,lower_barrier,ecea,120,,fixed,CAD per quarter,Household non-medical cost while unresolved,synthetic_assumption,Travel time off work and missed appointments
+hh_cost_unresolved,moderate_barrier,ecea,180,,fixed,CAD per quarter,Household non-medical cost while unresolved,synthetic_assumption,As above
+hh_cost_unresolved,higher_barrier,ecea,260,,fixed,CAD per quarter,Household non-medical cost while unresolved,synthetic_assumption,As above
+hh_cost_managed,lower_barrier,ecea,50,,fixed,CAD per quarter,Household non-medical cost while managed,synthetic_assumption,As above
+hh_cost_managed,moderate_barrier,ecea,70,,fixed,CAD per quarter,Household non-medical cost while managed,synthetic_assumption,As above
+hh_cost_managed,higher_barrier,ecea,100,,fixed,CAD per quarter,Household non-medical cost while managed,synthetic_assumption,As above
+hh_cost_acute,lower_barrier,ecea,900,,fixed,CAD per acute event,Household non-medical cost of an acute event,synthetic_assumption,Lost income and travel during admission
+hh_cost_acute,moderate_barrier,ecea,1100,,fixed,CAD per acute event,Household non-medical cost of an acute event,synthetic_assumption,As above
+hh_cost_acute,higher_barrier,ecea,1400,,fixed,CAD per acute event,Household non-medical cost of an acute event,synthetic_assumption,As above
+hh_income_median,lower_barrier,ecea,95000,,fixed,CAD per year,Median annual household income,synthetic_assumption,Illustrative
+hh_income_median,moderate_barrier,ecea,65000,,fixed,CAD per year,Median annual household income,synthetic_assumption,Illustrative
+hh_income_median,higher_barrier,ecea,40000,,fixed,CAD per year,Median annual household income,synthetic_assumption,Illustrative
+its_n_months,all,its,60,,fixed,months,Months of synthetic monitoring data (Jan 2021 to Dec 2025),synthetic_assumption,Three years before and two years after launch
+its_launch_month,all,its,37,,fixed,month index,First month with navigation (January 2024),synthetic_assumption,Illustrative launch date
+its_trend_logit_per_year,all,its,0.05,,fixed,logit per year,Underlying secular trend,synthetic_assumption,Slow improvement without navigation
+its_season_amplitude,all,its,0.08,,fixed,logit,Seasonal amplitude (winter dip),synthetic_assumption,Seasonality the model must control for
+its_ar1_rho,all,its,0.35,,fixed,correlation,AR(1) autocorrelation of monthly noise,synthetic_assumption,Autocorrelation the model must handle
+its_ar1_sd,all,its,0.06,,fixed,logit,Innovation SD of monthly noise,synthetic_assumption,Illustrative
+its_referrals_month,lower_barrier,its,420,,fixed,referrals per month,Mean monthly referrals,synthetic_assumption,Illustrative
+its_referrals_month,higher_barrier,its,280,,fixed,referrals per month,Mean monthly referrals,synthetic_assumption,Illustrative
+rdd_n,all,rdd,6000,,fixed,patients,Referred patients in the synthetic RDD sample,synthetic_assumption,Illustrative
+rdd_cutoff,all,rdd,60,,fixed,score points,Barrier-risk score at or above which navigation is offered,synthetic_assumption,Illustrative eligibility rule
+rdd_score_mean,all,rdd,50,,fixed,score points,Mean of the barrier-risk score,synthetic_assumption,Truncated to 0-100
+rdd_score_sd,all,rdd,15,,fixed,score points,SD of the barrier-risk score,synthetic_assumption,As above
+rdd_p_cutoff_untreated,all,rdd,0.30,,fixed,probability,90-day completion at the cutoff without navigation,synthetic_assumption,Illustrative
+rdd_slope_logit_per10,all,rdd,-0.35,,fixed,logit per 10 points,Change in completion log-odds per 10 score points,synthetic_assumption,Higher barrier score means lower completion
+rdd_effect_navigated,all,rdd,0.12,,fixed,probability,Planted effect of navigation at the cutoff among the navigated,synthetic_assumption,Fuzzy estimand; the sharp estimand is 0.12 x (0.70 - 0.05)
+rdd_uptake_offered,all,rdd,0.70,,fixed,proportion,Uptake among patients offered navigation,synthetic_assumption,Creates a fuzzy design
+rdd_uptake_not_offered,all,rdd,0.05,,fixed,proportion,Share navigated below the cutoff through clinician discretion,synthetic_assumption,Two-sided non-compliance as seen in practice
+rdd_age_mean,all,rdd,58,,fixed,years,Mean age (balance-check covariate),synthetic_assumption,Unaffected by the cutoff by construction
+rdd_age_sd,all,rdd,12,,fixed,years,SD of age,synthetic_assumption,As above
+des_capacity,all,des,12,,fixed,appointment slots per day,Diagnostic clinic capacity,synthetic_assumption,Illustrative
+des_appt_duration,all,des,1,,fixed,days,Time a booked slot is occupied,synthetic_assumption,One appointment occupies one slot-day
+des_rebook_delay,all,des,7,,fixed,days,Delay before a no-show is rebooked,synthetic_assumption,Illustrative
+des_arrival_rate,all,des,10.5,,fixed,referrals per day,Mean daily referral arrivals (Poisson),synthetic_assumption,Chosen so no-shows push usual care close to capacity
+des_backlog,all,des,200,,fixed,referrals,Waitlist already present at day 0,synthetic_assumption,Starting backlog
+des_horizon_days,all,des,730,,fixed,days,Period during which new referrals arrive,synthetic_assumption,Two years
+des_run_until,all,des,1100,,fixed,days,Simulation end (lets queues clear),synthetic_assumption,Long enough for all referrals to finish
+des_max_attempts,all,des,20,,fixed,attempts,Safety cap on booking attempts per patient,structural_choice,Probability of reaching it is negligible
+des_rr_noshow_nav,all,des,0.5,,fixed,relative risk,No-show risk for navigated patients relative to others,synthetic_assumption,Navigation reduces missed appointments
+des_p_noshow,lower_barrier,des,0.08,,fixed,probability per appointment,No-show probability without navigation,synthetic_assumption,Barrier gradient in attendance
+des_p_noshow,moderate_barrier,des,0.14,,fixed,probability per appointment,No-show probability without navigation,synthetic_assumption,Barrier gradient in attendance
+des_p_noshow,higher_barrier,des,0.24,,fixed,probability per appointment,No-show probability without navigation,synthetic_assumption,Barrier gradient in attendance

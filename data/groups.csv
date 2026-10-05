@@ -1,0 +1,4 @@
+group,label,pop_share,cohort_share,baseline_qale,oc_proportional,oc_higher_concentrated,oc_lower_concentrated
+lower_barrier,Lower barrier,0.50,0.35,72,0.50,0.40,0.60
+moderate_barrier,Moderate barrier,0.30,0.35,67,0.30,0.30,0.25
+higher_barrier,Higher barrier,0.20,0.30,61,0.20,0.30,0.15

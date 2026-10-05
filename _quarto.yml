@@ -1,0 +1,20 @@
+project:
+  type: default
+  output-dir: docs
+  execute-dir: project   # code runs from the project root, so paths like outputs/ work
+  render:
+    - index.qmd          # render only the report (not README or methods notes)
+
+format:
+  html:
+    toc: true
+    toc-depth: 2
+    number-sections: true
+    embed-resources: true  # one self-contained HTML file: easy to share and to host
+    theme: cosmo
+    fig-align: center
+
+execute:
+  echo: false      # the code lives in R/; the report shows results
+  warning: true    # any warning is shown in the report, never hidden
+  message: false

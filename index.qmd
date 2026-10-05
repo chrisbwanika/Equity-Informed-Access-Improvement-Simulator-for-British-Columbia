@@ -1,0 +1,391 @@
+---
+title: "Equity-Informed Access Improvement Simulator for British Columbia"
+subtitle: "A reproducible, synthetic-data capability demonstrator (version 2.0.0)"
+author: "Christopher Bwanika"
+date: last-modified
+date-format: "D MMMM YYYY"
+---
+
+```{r setup}
+if (!file.exists(file.path("outputs", "run_manifest.csv"))) {
+  stop("No outputs found. Run run_all.R (and tests/run_tests.R) before rendering.")
+}
+out <- function(name) utils::read.csv(file.path("outputs", name), check.names = FALSE)
+fig <- function(name) knitr::include_graphics(file.path("outputs", "figures", name))
+num <- function(x, d = 0) formatC(x, format = "f", digits = d, big.mark = ",")
+pct <- function(x, d = 0) paste0(formatC(100 * x, format = "f", digits = d), "%")
+tab <- function(df, digits = 3, ...) knitr::kable(df, digits = digits, row.names = FALSE,
+                                                  format.args = list(big.mark = ","), ...)
+lab <- c(usual_care = "Usual care", targeted_navigation = "Targeted navigation",
+         universal_navigation = "Universal navigation", lower_barrier = "Lower barrier",
+         moderate_barrier = "Moderate barrier", higher_barrier = "Higher barrier", all = "All")
+relabel <- function(x) ifelse(x %in% names(lab), lab[x], x)
+options(knitr.kable.NA = "")
+
+pars <- utils::read.csv(file.path("data", "parameters.csv"))
+pv <- function(p, g = "all") pars$value[pars$parameter == p & pars$group == g]
+k0 <- pv("k_threshold")
+bs <- out("base_case_by_strategy.csv"); inc <- out("base_case_incremental.csv")
+vs <- out("base_case_vs_usual_care.csv"); grp <- out("base_case_by_group.csv")
+ceac <- out("psa_ceac_evpi.csv"); p_at_k <- ceac[ceac$k == k0, ]
+icer_t <- vs$icer_vs_usual_care[vs$strategy == "targeted_navigation"]
+icer_ut <- inc$icer[inc$strategy == "universal_navigation"]
+opt <- bs$strategy[bs$optimal_at_k]
+grp_icer <- sapply(c("lower_barrier", "moderate_barrier", "higher_barrier"), function(g) {
+  a <- grp[grp$strategy == "universal_navigation" & grp$group == g, ]
+  b <- grp[grp$strategy == "usual_care" & grp$group == g, ]
+  (a$cost - b$cost) / (a$qaly - b$qaly)
+})
+dsum <- out("dcea_psa_summary.csv"); trade <- out("dcea_tradeoff.csv")
+cross <- trade$epsilon[trade$k == 100000 & trade$preferred == "targeted_navigation"]
+cross_eps <- if (length(cross) > 0) min(cross) else NA
+```
+
+::: {.callout-warning}
+## Synthetic-data capability demonstrator
+All data, inputs and results in this report are **simulated** to illustrate methods. This is
+not an official analysis, recommendation, endorsement or evaluation by any government, health
+authority, agency or community, and no result describes a real population or programme.
+:::
+
+# Summary
+
+**Decision question (hypothetical).** For adults referred into a diagnostic or specialist
+pathway, should a health system offer patient navigation to everyone, only to patients facing
+the highest structural barriers, or to no one (usual care)?
+
+**What the prototype shows (illustrative results only).**
+
+- In the base case, targeted navigation costs CAD `r num(icer_t)` per QALY gained compared
+  with usual care, and moving from targeted to universal navigation costs CAD
+  `r num(icer_ut)` per QALY. At CAD `r num(k0)` per QALY the strategy with the highest net
+  monetary benefit is **`r relabel(opt)`**.
+- Navigation is far better value where barriers are highest: CAD
+  `r num(grp_icer[["higher_barrier"]])` per QALY in the higher-barrier group against CAD
+  `r num(grp_icer[["lower_barrier"]])` in the lower-barrier group.
+- In the probabilistic analysis, the probability that targeted navigation is optimal at CAD
+  `r num(k0)` per QALY is `r pct(p_at_k$prob_optimal[p_at_k$strategy == "targeted_navigation"])`
+  (universal: `r pct(p_at_k$prob_optimal[p_at_k$strategy == "universal_navigation"])`).
+- Distributional analysis: targeted navigation both adds health and narrows the gap between
+  groups in `r pct(dsum$prob_win_win[dsum$strategy == "targeted_navigation"], 1)` of PSA
+  draws. At CAD 100,000 per QALY universal navigation yields more total health, and targeted
+  navigation is preferred only with Atkinson inequality aversion of at least
+  `r cross_eps` - a genuine equity-efficiency trade-off.
+
+These are **assumption-dependent simulated outputs**, produced to demonstrate an auditable
+workflow. They are not evidence about any real programme.
+
+# Decision problem
+
+| Element | Specification |
+|---|---|
+| Population | Synthetic cohort of adults aged 55 referred into a diagnostic/specialist pathway, in three structural-barrier groups |
+| Strategies | Usual care; targeted navigation (higher-barrier group only); universal navigation (all groups) |
+| Perspective | Publicly funded health system (costs); household non-medical costs reported separately (ECEA-lite) |
+| Time horizon | Lifetime (to age 100), quarterly cycles |
+| Discounting | 1.5% per year for costs and QALYs (CDA-AMC reference case); 0% and 3% in scenarios |
+| Outcomes | Costs, QALYs, life-years, acute events, time unresolved; NMB; distribution of health; household burden |
+| Currency | Canadian dollars, illustrative values (no price-year adjustment applies to synthetic inputs) |
+| Threshold | CAD `r num(k0)` per QALY for illustration; results shown from 0 to 150,000 |
+
+# Model
+
+A cohort state-transition (Markov) model with four states and quarterly cycles. Transitions
+are built as sequential conditional probabilities, so every row of every transition matrix
+sums to one by construction. Navigation multiplies the hazard of completing the pathway for
+navigated patients while support lasts (`r pv("nav_cycles")` quarters); uptake is lower in
+higher-barrier groups. Offered groups are modelled as an exact uptake-weighted mix of a
+navigated and a non-navigated sub-cohort.
+
+```{mermaid}
+flowchart LR
+  U[Unresolved] -->|pathway completed| M[Managed]
+  M -->|disengages| U
+  U -->|acute event| A[Acute event<br/>one quarter]
+  M -->|acute event| A
+  A -->|survives, enters care| M
+  A -->|survives, not in care| U
+  U --> D[Dead]
+  M --> D
+  A --> D
+```
+
+```{r fig-trace, fig.cap="Cohort trace for the higher-barrier group, first 10 years."}
+fig("fig01_trace.png")
+```
+
+## Inputs
+
+Every input, its distribution and its rationale is held in `data/parameters.csv`.
+`value` is the distribution mean and `se` its standard error.
+
+```{r inputs}
+p <- pars[pars$module %in% c("markov", "ecea"),
+          c("parameter", "group", "value", "se", "distribution", "unit", "source_type")]
+tab(p, digits = 4)
+```
+
+# Cost-effectiveness results
+
+## Base case (deterministic)
+
+```{r base}
+b <- bs[, c("strategy", "cost", "qaly", "ly", "acute_events", "nmb")]
+b$strategy <- relabel(b$strategy)
+tab(b, digits = 4, col.names = c("Strategy", "Cost (CAD)", "QALYs", "Life-years",
+                                 "Acute events", "NMB (CAD)"))
+```
+
+```{r frontier}
+f <- inc[, c("strategy", "status", "inc_cost", "inc_effect", "icer")]
+f$strategy <- relabel(f$strategy)
+tab(f, digits = 4, col.names = c("Strategy", "Status", "Incremental cost", "Incremental QALYs",
+                                 "ICER (CAD/QALY)"))
+```
+
+Per-patient results by group (offered groups include uptake):
+
+```{r by-group}
+g <- grp[, c("strategy", "group", "cost", "qaly", "acute_events", "time_unresolved", "managed_1y")]
+g$strategy <- relabel(g$strategy); g$group <- relabel(g$group)
+tab(g, digits = 4)
+```
+
+## One-way and scenario analyses
+
+```{r fig-tornado, fig.cap="One-way sensitivity analysis: each input at its 2.5th and 97.5th PSA percentile."}
+fig("fig05_tornado.png")
+```
+
+```{r scenarios}
+s <- out("scenarios.csv")
+s$strategy <- relabel(s$strategy); s$optimal_strategy <- relabel(s$optimal_strategy)
+tab(s, digits = 4)
+```
+
+## Probabilistic sensitivity analysis
+
+`r num(nrow(out("psa_parameter_draws.csv")))` iterations; one parameter draw is shared by all
+strategies and groups within an iteration.
+
+```{r psa-summary}
+ps <- out("psa_summary.csv"); ps$strategy <- relabel(ps$strategy)
+tab(ps[, c("strategy", "mean_inc_cost", "inc_cost_lo", "inc_cost_hi",
+           "mean_inc_qaly", "inc_qaly_lo", "inc_qaly_hi")], digits = 4,
+    col.names = c("Strategy", "Mean incremental cost", "2.5%", "97.5%",
+                  "Mean incremental QALYs", "2.5%", "97.5%"))
+```
+
+```{r fig-ce-plane, fig.cap="Cost-effectiveness plane."}
+fig("fig02_ce_plane.png")
+```
+
+```{r fig-ceac, fig.cap="Cost-effectiveness acceptability curves and frontier."}
+fig("fig03_ceac.png")
+```
+
+```{r fig-evpi, fig.cap="Expected value of perfect information for one annual cohort."}
+fig("fig04_evpi.png")
+```
+
+```{r fig-conv, fig.cap="Convergence of the PSA mean incremental NMB."}
+fig("fig06_convergence.png")
+```
+
+# Distributional cost-effectiveness analysis
+
+Health gains by group are combined with health opportunity costs (incremental cost divided by
+the threshold), shared across groups by an explicit rule. The base case shares them in
+proportion to population; two other rules are reported as scenarios, informed by English
+evidence that displaced health falls more heavily on deprived groups.
+
+```{r dcea-metrics}
+m <- out("dcea_metrics.csv")
+m <- m[, c("strategy", "oc_scenario", "total_nhb", "gap_reduction_days",
+           "ew_nhb_atkinson_0", "ew_nhb_atkinson_5", "ew_nhb_atkinson_10", "ew_nhb_kolm_0.15")]
+m$strategy <- relabel(m$strategy)
+tab(m, digits = 3, col.names = c("Strategy", "Opportunity-cost rule", "Net health benefit (QALYs)",
+                                 "Gap reduction (days/person)", "EW-NHB e=0", "EW-NHB e=5",
+                                 "EW-NHB e=10", "EW-NHB Kolm 0.15"))
+```
+
+```{r fig-dcea-dist, fig.cap="Net health change per person by group."}
+fig("fig07_dcea_distribution.png")
+```
+
+```{r fig-equity-plane, fig.cap="Equity-efficiency impact plane (PSA draws and base case)."}
+fig("fig08_equity_plane.png")
+```
+
+```{r fig-ede, fig.cap="Equity-weighted net health benefit across inequality aversion."}
+fig("fig09_ede_epsilon.png")
+```
+
+```{r dcea-psa}
+d <- dsum[, c("strategy", "prob_health_gain", "prob_inequality_reduced", "prob_win_win")]
+d$strategy <- relabel(d$strategy)
+tab(d, digits = 3, col.names = c("Strategy", "P(more health)", "P(smaller gap)", "P(both)"))
+```
+
+Inequality aversion is a value judgement, so results are shown across a range. For reference,
+a survey of the English public found median values of about 11 (Atkinson) and 0.15 (Kolm).
+
+# ECEA-lite: household non-medical burden
+
+First-year household non-medical costs (travel, time off work, missed appointments, lost income
+during acute events) are simulated for individual patients through the same transition
+matrices as the cohort model. This is a financial-burden extension, not a full ECEA and not a
+measure of catastrophic health expenditure.
+
+```{r ecea}
+e <- out("ecea_results.csv")
+e <- e[, c("strategy", "group", "mean_hh_cost", "share_above_0.025", "share_above_0.05",
+           "share_above_0.1", "high_burden_averted_per_1000")]
+e$strategy <- relabel(e$strategy); e$group <- relabel(e$group)
+tab(e, digits = 4)
+```
+
+```{r fig-ecea, fig.cap="Share of households above the high-burden threshold."}
+fig("fig10_ecea.png")
+```
+
+Cross-validation of the microsimulation against the cohort model:
+
+```{r ecea-check}
+tab(out("ecea_cross_check.csv"), digits = 2)
+```
+
+# Causal-evidence demonstrations
+
+These modules use synthetic data with **known, planted effects**. Their purpose is to show that
+the estimation pipelines recover what was planted and pass standard falsification checks, not
+to estimate any real effect.
+
+## Interrupted time series
+
+```{r fig-its, fig.cap="Synthetic ITS: observed, fitted and counterfactual series."}
+fig("fig11_its.png")
+```
+
+```{r its-est}
+ie <- out("its_estimates.csv"); ie$group <- relabel(ie$group)
+tab(ie[, c("group", "analysis", "term", "estimate", "ci_lo", "ci_hi", "planted")], digits = 4)
+```
+
+```{r its-cal}
+ic <- out("its_calibration.csv"); ic$group <- relabel(ic$group)
+tab(ic, digits = 3, col.names = c("Group", "Mean bias", "95% CI coverage", "Placebo false-positive rate"))
+```
+
+The calibration re-generates the synthetic data many times. With REML estimation, coverage is
+close to the nominal 95% and the placebo test's false-positive rate is close to 5%; maximum
+likelihood gave noticeably narrower, over-confident intervals in development, consistent with
+published simulation evidence on short interrupted time series.
+
+Bridge from the ITS estimate to the Markov input (a consistency check, not new evidence):
+
+```{r its-bridge}
+ib <- out("its_bridge.csv"); ib$group <- relabel(ib$group)
+tab(ib, digits = 3, col.names = c("Group", "Model input HR", "ITS-implied HR", "2.5%", "97.5%"))
+```
+
+## Regression discontinuity
+
+```{r fig-rdd, fig.cap="Synthetic RDD: 90-day completion around the eligibility cutoff."}
+fig("fig12_rdd.png")
+```
+
+```{r rdd-est}
+tab(rbind(out("rdd_estimates.csv"), out("rdd_checks.csv"))[, c("analysis", "estimate",
+    "robust_ci_lo", "robust_ci_hi", "bandwidth", "planted", "covers_planted")], digits = 3)
+```
+
+Density (manipulation) test p-value: `r num(out("rdd_density_test.csv")$p_value, 3)`.
+
+```{r rdd-cal}
+tab(out("rdd_calibration.csv"), digits = 3, col.names = c("Estimator", "Mean bias", "95% CI coverage"))
+```
+
+# Discrete event simulation: clinic capacity and no-shows
+
+A booked slot is used whether or not the patient attends, so no-shows waste scarce capacity.
+Because navigation reduces no-shows, it can shorten waits for everyone - including patients who
+are not navigated - a system-level effect a cohort model cannot represent.
+
+```{r fig-des-queue, fig.cap="Diagnostic waitlist over time."}
+fig("fig13_des_queue.png")
+```
+
+```{r fig-des-waits, fig.cap="Days from referral to completed appointment."}
+fig("fig14_des_waits.png")
+```
+
+```{r des}
+ds <- out("des_summary.csv"); ds$strategy <- relabel(ds$strategy); ds$group <- relabel(ds$group)
+tab(ds[order(ds$group, ds$strategy), ], digits = 3)
+```
+
+# Verification and validation
+
+```{r tests, results="asis"}
+if (file.exists(file.path("outputs", "test_results.csv"))) {
+  tr <- out("test_results.csv")
+  cat(sprintf("The automated test suite ran **%d tests** (%s expectations passed; %d failed or errored).",
+              nrow(tr), num(sum(tr$passed)), sum(tr$failed) + sum(tr$error)), "\n\n")
+  tr$one <- 1
+  print(knitr::kable(stats::aggregate(cbind(tests = one, expectations = passed, failed) ~ file,
+                                      data = tr, FUN = sum), row.names = FALSE))
+} else {
+  cat("Test results not found: run `tests/run_tests.R` before rendering.\n")
+}
+```
+
+The tests cover every defect found in the v1 blueprint, known-answer checks of the engine,
+null and direction tests, distribution properties, accounting identities in the DCEA, the
+microsimulation-cohort cross-check, planted-effect recovery in the causal modules, and
+regression tests against stored reference values. See `methods/verification.md`.
+
+# Limitations
+
+- Every input is synthetic. No result is calibrated to, or validated against, real data.
+- The cohort model is a single-age cohort; age, comorbidity and repeat referrals are not modelled.
+- Parameters are sampled independently; correlations between inputs are not represented.
+- The navigation effect is assumed to act only on pathway completion and only while support lasts.
+- Opportunity-cost distribution rules and inequality aversion are value-laden scenario choices.
+- The ITS and RDD data are generated from the model's own assumptions, so their agreement with
+  the model is a consistency check, not independent evidence.
+- The DES represents one stylised clinic and is not linked to the cohort model's outcomes.
+- Barrier groups are neutral constructs; any real application needs community co-design,
+  data governance and ethical review before groups are defined.
+
+# Reporting checklist (CHEERS 2022)
+
+| # | Item | Where addressed |
+|---|---|---|
+| 1-2 | Title; abstract | Title; Summary |
+| 3 | Background and objectives | Summary; Decision problem |
+| 4 | Health economic analysis plan | `methods/protocol.md` |
+| 5-10 | Population, setting, comparators, perspective, time horizon, discount rate | Decision problem |
+| 11-13 | Selection, measurement and valuation of outcomes | Model; Inputs |
+| 14-15 | Resources and costs; currency and price date | Inputs; Decision problem |
+| 16-17 | Rationale and description of model; analytics and assumptions | Model; `methods/model_specification.md` |
+| 18 | Characterising heterogeneity | Results by group |
+| 19 | Characterising distributional effects | DCEA; ECEA-lite |
+| 20 | Characterising uncertainty | One-way, scenario and probabilistic analyses |
+| 21 | Approach to engagement with patients and others | Not undertaken (synthetic demonstrator); required before real use |
+| 22-24 | Study parameters; main results; effect of uncertainty | Inputs; Results |
+| 25 | Effect of engagement | Not applicable (no engagement undertaken) |
+| 26 | Findings, limitations, generalisability | Summary; Limitations |
+| 27-28 | Funding; conflicts of interest | Unfunded; none declared |
+
+# Reproducibility
+
+Run `run_all.R`, then `tests/run_tests.R`, then `quarto render`. The package versions are
+pinned in `renv.lock`; every output's MD5 checksum is recorded in `outputs/run_manifest.csv`.
+
+```{r manifest}
+mf <- out("run_manifest.csv")
+tab(mf[mf$section %in% c("run", "package"), c("section", "item", "value")])
+```
+
+`r sum(mf$section == "file_md5")` output files were checksummed in this run.
