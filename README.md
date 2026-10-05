@@ -60,5 +60,19 @@ See `methods/ai_assistance.md` for how AI tools were used and how their output w
 
 ## Licence and citation
 
+- Code (everything in `R/`, `tests/`, and the run scripts): MIT Licence.
+  See `LICENSE`.
+- Documentation and report (README, `methods/`, and the rendered report):
+  Creative Commons Attribution 4.0 International (CC BY 4.0).
+  See `LICENSE-DOCS.md`.
+- Data: all data in this repository are synthetic. No real or personal data
+  were used. The synthetic data carry no restrictions beyond the licences above.
+- Dependencies: R packages are not bundled. `renv.lock` records the versions
+  used, and each package remains under its own licence.
+
+## How to cite
+
+Bwanika, C. (2026). *Equity-Informed Access Improvement Simulator* (Version 2)
+[Computer software]. [repository URL]
 Code: MIT licence (`LICENSE`). Documentation and report text: CC BY 4.0. To cite, use
-`CITATION.cff` (GitHub shows a "Cite this repository" button).
+`CITATION.cff`.
