@@ -1,9 +1,4 @@
 # AI assistance statement
-
-> Edit this statement so that it is accurate before you make the repository public.
-> An honest, specific statement is more credible than silence or a vague one.
-
-## Statement (template)
 This repository was designed and is maintained by Christopher Bwanika. An AI assistant
 (Anthropic's Claude) drafted parts of the code and documentation under my direction. I
 specified the decision problem and the methods, reviewed every file, ran the pipeline and
