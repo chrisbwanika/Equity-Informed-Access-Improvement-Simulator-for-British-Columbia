@@ -2,6 +2,8 @@
 
 **Version 2.0.0 · synthetic-data capability demonstrator · R**
 
+**Live report:** <https://github.com/chrisbwanika/Equity-Informed-Access-Improvement-Simulator-for-British-Columbia/blob/master/docs/index.html>
+
 > **Disclaimer.** All data, inputs and results in this repository are simulated to
 > illustrate methods. This is not an official analysis, recommendation, endorsement or
 > evaluation by any government, health authority, agency or community. No result
@@ -25,14 +27,52 @@ of clinic capacity and missed appointments.
 
 ## Quick start
 
-1. Install R, RStudio Desktop and Quarto (and Git if you will use version control).
-2. Open `equity-access-simulator-bc.Rproj` in RStudio.
-3. In the RStudio Console: `renv::restore()` (first time on a new machine).
-4. Run everything: `source("run_all.R")` (about 2 minutes).
-5. Run the tests: `source("tests/run_tests.R")` (all must pass).
-6. Build the report in the RStudio **Terminal**: `quarto render` → `docs/index.html`.
+1. **Get the code.** On the GitHub repository page, choose **Code → Download ZIP** and extract it
+   (or run `git clone <repository URL>` if you use Git).
+   The ZIP extracts into a folder inside a folder of the same name. **Open the inner folder**
+   (the one that contains `run_all.R`). A short path such as `C:\projects\` is recommended, and
+   avoid folders synchronised by OneDrive, Dropbox or Google Drive.
+2. **Install R and RStudio Desktop.**
+   The project was tested with R 4.6.1 (the minimum supported version is 4.3). Current versions
+   of RStudio include Quarto; install Quarto separately only if you use another editor. Git is
+   optional and only needed for version control.
+3. **Open the project.** Double-click `equity-access-simulator-bc.Rproj` in RStudio. The first
+   time, renv installs itself automatically and may report that packages are not installed.
+ . **Restore the packages.** In the RStudio Console, run `renv::restore()` and answer **Y** when
+   asked to proceed.
+   This takes about 1 to 10 minutes (longer on a slow connection). On Windows you do not normally
+   need Rtools; install it only if renv reports that a package must be compiled from source.
+   Check the result with `renv::status()`, which should report no issues.
+5. **Run everything.** `source("run_all.R")` (about 2 to 4 minutes). Run it from the project root,
+   with the `.Rproj` open.
+ . **Run the tests.** `source("tests/run_tests.R")` (about 1 to 2 minutes). All tests must pass.
+   The final line should read:
+   `40 tests | 3794 expectations passed | 0 failed or errored`
+ . **Build the report.** In the RStudio **Terminal** (not the Console), run `quarto render`
+   (under a minute). This creates `docs/index.html`. Run this only after `run_all.R` has finished,
+   because the report reads the files in `outputs/`.
+
+**Notes**
+
+- **The rebuilt report differs slightly from the published one.** The "Published" date follows
+  the file's last-modified time, and the run timestamps in the Reproducibility section are those
+  of the machine that ran it. Numbers and figures are unchanged. Rendering also overwrites the
+  tracked file `docs/index.html`.
+- **Do not open or save the CSV files in Excel.** Excel changes how some values display (for
+  example `3.0` appears as `3`) and can corrupt a saved file. Use a text editor such as VS Code.
+
+## Troubleshooting
+
+| Problem | Likely cause and fix |
+|---|---|
+| "The working directory must be the project root" | Open `equity-access-simulator-bc.Rproj` instead of opening files one by one. |
+| "Missing packages ... Run renv::restore() first" | Run `renv::restore()`, answer **Y**, then `renv::status()`. |
+| `quarto render` fails because files in `outputs/` are missing | Run `source("run_all.R")` first. |
+| `renv::restore()` mentions Rtools or compiling | Install Rtools matching your R version (Windows only), restart R and try again. |
+| Package or file-path errors with very long folder names | Move the project to a short path such as `C:\projects\`. |
 
 ## Repository map
+
 
 | Path | Contents |
 |---|---|
@@ -44,6 +84,10 @@ of clinic capacity and missed appointments.
 | `methods/` | Analysis plan, model specification, verification record, AI-assistance statement |
 | `outputs/` | Generated tables, figures and run manifest (not committed; recreated by `run_all.R`) |
 | `docs/` | Rendered report, served by GitHub Pages |
+| `renv.lock`, `renv/`, `.Rprofile` | Locked package versions and the renv set-up that restores them |
+| `_dependencies.R` | Lists the packages so renv can detect them; never run directly |
+| `CITATION.cff`, `CHANGELOG.md` | Citation metadata and the version history |
+| `LICENSE`, `LICENSE-DOCS.md` | Licences for code and for documentation |
 
 ## Reproducibility and audit features
 
@@ -58,27 +102,8 @@ of clinic capacity and missed appointments.
 
 See `methods/ai_assistance.md` for how AI tools were used and how their output was verified.
 
-## Licence 
+## Licence and citation
 
-- Code (everything in `R/`, `tests/`, and the run scripts): MIT Licence.
-  See `LICENSE`.
-- Documentation and report (README, `methods/`, and the rendered report):
-  Creative Commons Attribution 4.0 International (CC BY 4.0).
-  See `LICENSE-DOCS.md`.
-- Data: all data in this repository are synthetic. No real or personal data
-  were used. The synthetic data carry no restrictions beyond the licences above.
-- Dependencies: R packages are not bundled. `renv.lock` records the versions
-  used, and each package remains under its own licence.
-
-## How to cite
-
-If you use or adapt this work, please cite it:
-
-Bwanika, C. (2026). *Equity-Informed Access Improvement Simulator for British Columbia*
-(Version 2.0.0).
-https://github.com/chrisbwanika/Equity-Informed-Access-Improvement-Simulator-for-British-Columbia
-
-Bwanika, C. (2026). *Equity-Informed Access Improvement Simulator* (Version 2)
-
-Code: MIT licence (`LICENSE`). Documentation and report text: CC BY 4.0. To cite, use
-`CITATION.cff`.
+Code: MIT licence. Documentation and report text: CC BY 4.0. Both are stated in `LICENSE`.
+All data in this repository are synthetic. To cite this work, use `CITATION.cff`
+(GitHub shows a "Cite this repository" button).
