@@ -1,22 +1,25 @@
 cff-version: 1.2.0
 message: "If you use this software, please cite it as below."
+type: software
 title: "Equity-Informed Access Improvement Simulator for British Columbia"
 version: 2.0.0
-date-released: 2026-09-21   # change to the date you publish the release
+date-released: 2026-10-05
 abstract: >-
   A reproducible, synthetic-data capability demonstrator for equity-informed
   health economic evaluation in R: an equity-stratified cohort state-transition
   model with probabilistic sensitivity analysis, distributional cost-effectiveness
   analysis and a household financial-burden extension, plus demonstration
-  interrupted time series, regression discontinuity and discrete event simulation modules.
+  interrupted time series, regression discontinuity and discrete event
+  simulation modules. All data are synthetic.
 authors:
   - family-names: Bwanika
     given-names: Christopher
 license: MIT
-repository-code: "https://github.com/YOUR-GITHUB-USERNAME/equity-access-simulator-bc"
+repository-code: "https://github.com/chrisbwanika/Equity-Informed-Access-Improvement-Simulator-for-British-Columbia"
 keywords:
   - health economics
   - distributional cost-effectiveness analysis
   - cohort state-transition model
+  - probabilistic sensitivity analysis
   - reproducible research
   - R
