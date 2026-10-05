@@ -58,7 +58,7 @@ of clinic capacity and missed appointments.
 
 See `methods/ai_assistance.md` for how AI tools were used and how their output was verified.
 
-## Licence and citation
+## Licence 
 
 - Code (everything in `R/`, `tests/`, and the run scripts): MIT Licence.
   See `LICENSE`.
