@@ -6,11 +6,10 @@ the full test suite on my own computer, and I am responsible for all modelling c
 results and any errors. All data are synthetic.
 
 ## Verification of AI-drafted material
-| File or section | What the AI drafted | How I verified it | Date |
-|---|---|---|---|
-| R/02_engine.R | Generic cohort engine | Read line by line; known-answer tests pass | |
-|Whole pipeline (run_all.R)	Ran on my own laptop (Windows, R 4.6.1) | | all 48 outputs produced in 3.7 minutes| 1 October 2026|
-|Test suite (40 tests)	Ran tests/run_tests.R| | 3,794 expectations passed, 0 failed| 1 October 2026|
+| What | How I verified it | Date |
+|---|---|---|
+| Whole pipeline (`run_all.R`) | Ran on my own laptop (Windows, R 4.6.1): all 48 outputs produced in 3.7 minutes | 1 October 2026 |
+| Test suite (40 tests) | Ran `tests/run_tests.R`: 3,794 expectations passed, 0 failed | 1 October 2026 |
 
 ## Rules followed
 - No real, personal or confidential data was ever given to an AI tool.
