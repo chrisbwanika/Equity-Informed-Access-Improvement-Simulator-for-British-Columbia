@@ -1,6 +1,6 @@
 # AI assistance statement
 This repository was designed and is maintained by Christopher Bwanika. An AI assistant
-(Anthropic's Claude) drafted parts of the code and documentation under my direction. I
+drafted the code, including helping with the tests and documentation under my direction. I
 specified the decision problem, the scope and the methods; reviewed every file, ran the full pipeline and
 the full test suite on my own computer, and I am responsible for all modelling choices,
 results and any errors. All data are synthetic.
