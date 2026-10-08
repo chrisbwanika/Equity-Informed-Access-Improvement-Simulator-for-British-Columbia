@@ -2,7 +2,7 @@
 
 **Version 2.0.0 · synthetic-data capability demonstrator · R**
 
-**Live report:** <https://github.com/chrisbwanika/Equity-Informed-Access-Improvement-Simulator-for-British-Columbia/blob/master/docs/index.html>
+**Live report:** <https://chrisbwanika.github.io/Equity-Informed-Access-Improvement-Simulator-for-British-Columbia/>
 
 > **Disclaimer.** All data, inputs and results in this repository are simulated to
 > illustrate methods. This is not an official analysis, recommendation, endorsement or
@@ -102,8 +102,11 @@ of clinic capacity and missed appointments.
 
 See `methods/ai_assistance.md` for how AI tools were used and how their output was verified.
 
+## Feedback
+Corrections, questions and reviews are welcome: please open an issue.
+
 ## Licence and citation
 
-Code: MIT licence. Documentation and report text: CC BY 4.0. Both are stated in `LICENSE`.
+Code: MIT licence (`LICENSE`). Documentation and report text: CC BY 4.0 (`LICENSE-DOCS.md`).
 All data in this repository are synthetic. To cite this work, use `CITATION.cff`
 (GitHub shows a "Cite this repository" button).
