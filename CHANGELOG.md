@@ -7,7 +7,7 @@ All notable changes are recorded here. Version numbers follow semantic versionin
 
 Complete redesign following a review of the v1 blueprint.
 
-### Fixed (v1 defects, each now covered by a test in `tests/testthat/test-01-v1-acceptance.R`)
+Fixed (v1 defects, each now covered by a test in `tests/testthat/test-01-v1-acceptance.R`)
 - Gamma draws used positional arguments, so a scale was read as a rate. All sampling now
   names its arguments, and PSA means are tested against base-case values.
 - Cost attachment was undefined. Costs are now attached to states per cycle, and the
@@ -24,9 +24,11 @@ Complete redesign following a review of the v1 blueprint.
   explicit quarterly cycles, lifetime horizon, within-cycle correction, deterministic base
   case, CE plane, CEAC/CEAF and EVPI.
 - The engine was hard-coded to three states. It is now generic (any number of states,
-  time-varying transitions), with matrix orientation tested.
+  time-varying transitions).
+- The transition matrix was multiplied the wrong way round, so people who died vanished
+  from the cohort. People now move from rows to columns, and a test checks it.
 
-### Added
+Added
 - Three strategies (usual care, targeted, universal) with full incremental analysis.
 - ECEA-lite microsimulation of household non-medical burden, cross-checked against the cohort model.
 - ITS, RDD and DES demonstration modules with planted-effect recovery and Monte Carlo calibration.
